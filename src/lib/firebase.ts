@@ -20,7 +20,22 @@ export const auth = getAuth(app);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const googleProvider = new GoogleAuthProvider();
 
-export const signIn = () => signInWithPopup(auth, googleProvider);
+export const signIn = async () => {
+  console.log("Attempting to sign in with popup...");
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    console.log("Sign in successful:", result.user.email);
+    return result;
+  } catch (error: any) {
+    console.error("SignIn Popup Error:", error.code, error.message);
+    if (error.code === 'auth/popup-blocked') {
+      alert("El navegador bloqueó la ventana emergente. Por favor, permite los popups para este sitio.");
+    } else if (error.code === 'auth/api-key-not-valid') {
+      alert("Error crítico: La API Key de Firebase en Vercel no es válida. Revisa las variables de entorno.");
+    }
+    throw error;
+  }
+};
 export const signOut = () => auth.signOut();
 
 async function testConnection() {
