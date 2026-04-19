@@ -6,7 +6,10 @@ import {
   collection, query, getDocs, writeBatch 
 } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, Copy, Play, ArrowRight, Trophy, Clock, Loader2 } from 'lucide-react';
+import { 
+  User, Copy, Play, ArrowRight, Trophy, Clock, Loader2,
+  Menu, X
+} from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Session, Participant, Deck, GameStatus } from '@/src/types';
 import { Card } from './Card';
@@ -23,6 +26,7 @@ export function GameSession() {
   const [hostDeck, setHostDeck] = useState<Deck | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const hasJoined = React.useRef(false);
 
   // Sync session and participants
@@ -251,9 +255,27 @@ export function GameSession() {
   );
 
   return (
-    <div className="flex h-screen w-full bg-brand-black overflow-hidden font-sans">
+    <div className="flex h-screen w-full bg-brand-black overflow-hidden font-sans relative">
+      {/* Mobile Sidebar Overlay */}
+      {showMobileMenu && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setShowMobileMenu(false)}
+        />
+      )}
+
       {/* Aside Sidebar */}
-      <aside className="w-72 border-r border-white/10 flex flex-col bg-black p-6 shrink-0 z-30">
+      <aside className={cn(
+        "fixed inset-y-0 left-0 z-50 w-72 border-r border-white/10 flex flex-col bg-black p-6 shrink-0 transition-transform duration-300 lg:relative lg:translate-x-0 cursor-default",
+        showMobileMenu ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <button 
+          className="lg:hidden absolute top-6 right-6 text-white/40 hover:text-white"
+          onClick={() => setShowMobileMenu(false)}
+        >
+          <X size={24} />
+        </button>
+
         <div className="mb-8">
           <h1 className="text-3xl font-black italic tracking-tighter uppercase leading-none">CAOS<span className="text-brand-accent">!</span></h1>
           <div className="mt-4 p-4 bg-white/5 rounded-xl border border-white/10 group active:scale-95 transition-all cursor-pointer"
@@ -271,9 +293,9 @@ export function GameSession() {
         </div>
 
         <div className="flex-1 flex flex-col min-h-0">
-          <div className="mb-6">
+          <div className="mb-6 flex-1 overflow-y-auto custom-scrollbar">
             <p className="text-[10px] font-mono uppercase tracking-[0.2em] opacity-40 mb-4">Jugadores ({participants.length}/8)</p>
-            <ul className="space-y-4">
+            <ul className="space-y-4 pr-2">
               {participants.map((p) => (
                 <li key={p.userId} className="flex justify-between items-center group">
                   <div className="flex items-center gap-2">
@@ -293,7 +315,7 @@ export function GameSession() {
             </ul>
           </div>
 
-          <div className="mt-auto h-72">
+          <div className="mt-auto h-72 border-t border-white/5 pt-4">
             <Chat sessionId={sessionId!} />
           </div>
         </div>
@@ -302,24 +324,33 @@ export function GameSession() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col bg-brand-gray relative overflow-hidden">
         {/* Top Header */}
-        <div className="flex justify-between items-center p-8 z-20">
+        <div className="flex items-center p-6 lg:p-8 z-20">
+          <button 
+            className="lg:hidden mr-4 p-2 bg-white/5 rounded-lg text-white"
+            onClick={() => setShowMobileMenu(true)}
+          >
+            <Menu size={20} />
+          </button>
+
           <div className="glass px-6 py-2 rounded-full hidden sm:flex items-center gap-3">
             <div className="w-2 h-2 rounded-full bg-brand-accent animate-pulse" />
             <span className="text-[10px] font-mono uppercase tracking-widest font-black">Partida Activa</span>
           </div>
 
-          <div className="flex items-center gap-8 ml-auto">
+          <div className="flex items-center gap-4 lg:gap-8 ml-auto">
             <button 
               onClick={() => navigate('/')}
               className="text-[10px] font-mono font-bold uppercase tracking-widest opacity-40 hover:opacity-100 hover:text-brand-accent transition-all flex items-center gap-2"
             >
-              Abanddonar Sala
+              <span className="hidden xs:inline">Abandonar Sala</span>
+              <X size={14} className="xs:hidden" />
             </button>
+            
             {session?.status === 'playing' && (
               <div className="text-right">
-                <p className="text-[10px] font-mono uppercase opacity-40 leading-none mb-1">Tiempo restante</p>
+                <p className="text-[8px] lg:text-[10px] font-mono uppercase opacity-40 leading-none mb-1">Tiempo</p>
                 <p className={cn(
-                  "text-4xl font-black tabular-nums transition-colors",
+                  "text-2xl lg:text-4xl font-black tabular-nums transition-colors",
                   timeLeft <= 5 ? "text-brand-accent" : "text-white"
                 )}>{timeLeft}s</p>
               </div>
@@ -330,7 +361,7 @@ export function GameSession() {
                 <button 
                   onClick={startGame}
                   disabled={participants.length < 2}
-                  className="bg-white text-black px-6 py-3 rounded-lg font-black text-xs uppercase hover:bg-brand-accent hover:text-white transition-all disabled:opacity-50"
+                  className="bg-white text-black px-4 lg:px-6 py-2 lg:py-3 rounded-lg font-black text-[10px] lg:text-xs uppercase hover:bg-brand-accent hover:text-white transition-all disabled:opacity-50"
                 >
                   EMPEZAR
                 </button>
@@ -338,9 +369,9 @@ export function GameSession() {
               {session?.status === 'voting' && session?.hostId === auth.currentUser?.uid && (
                 <button 
                   onClick={nextRound}
-                  className="bg-brand-accent text-white px-6 py-3 rounded-lg font-black text-xs uppercase hover:bg-white hover:text-black transition-all shadow-xl shadow-brand-accent/20"
+                  className="bg-brand-accent text-white px-4 lg:px-6 py-2 lg:py-3 rounded-lg font-black text-[10px] lg:text-xs uppercase hover:bg-white hover:text-black transition-all shadow-xl shadow-brand-accent/20"
                 >
-                  SIGUIENTE RONDA
+                  SIGUIENTE
                 </button>
               )}
             </div>
@@ -348,7 +379,7 @@ export function GameSession() {
         </div>
 
         {/* Game Board */}
-        <div className="flex-1 flex flex-col items-center justify-center p-8 overflow-y-auto custom-scrollbar pb-32">
+        <div className="flex-1 flex flex-col items-center justify-center p-4 lg:p-8 overflow-y-auto custom-scrollbar pb-48 lg:pb-32">
           <AnimatePresence mode="wait">
             {session?.status === 'waiting' && (
               <motion.div 
@@ -356,23 +387,23 @@ export function GameSession() {
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
                 className="text-center space-y-4"
               >
-                <h2 className="text-6xl font-black italic tracking-tighter opacity-10 uppercase">CAOS!</h2>
-                <h3 className="text-3xl font-black uppercase tracking-tight">Esperando al anfitrión...</h3>
+                <h2 className="text-4xl lg:text-6xl font-black italic tracking-tighter opacity-10 uppercase">CAOS!</h2>
+                <h3 className="text-xl lg:text-3xl font-black uppercase tracking-tight">Esperando al anfitrión...</h3>
                 <p className="font-mono text-[10px] uppercase tracking-widest opacity-30">Se requieren 2 jugadores mínimos</p>
               </motion.div>
             )}
 
             {(session?.status === 'playing' || session?.status === 'voting') && (
-              <motion.div key="active" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full max-w-5xl flex flex-col items-center gap-12">
-                <div className="flex flex-col lg:flex-row items-center justify-center gap-12 w-full">
+              <motion.div key="active" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full max-w-5xl flex flex-col items-center gap-8 lg:gap-12">
+                <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12 w-full">
                   {/* Black Card */}
-                  <Card type="black" text={session.currentBlackCard || ''} className="w-72 h-96 text-2xl p-8 shrink-0" />
+                  <Card type="black" text={session.currentBlackCard || ''} className="w-60 h-80 lg:w-72 lg:h-96 text-xl lg:text-2xl p-6 lg:p-8 shrink-0" />
 
                   {/* Played Cards Area */}
                   <div className="flex-1 flex flex-col gap-6 w-full lg:w-auto">
                     {session.status === 'playing' ? (
                       <div className="glass p-6 rounded-2xl border-white/5 text-center">
-                        <p className="text-xs font-mono uppercase tracking-[0.2em] opacity-40 mb-2 italic">A la espera de respuestas...</p>
+                        <p className="text-[10px] font-mono uppercase tracking-[0.2em] opacity-40 mb-2 italic">A la espera de respuestas...</p>
                         <div className="flex justify-center gap-2">
                            {participants.map((p, i) => (
                              <div key={i} className={cn(
@@ -383,16 +414,16 @@ export function GameSession() {
                         </div>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-2 gap-3 lg:gap-4 w-full">
                         {participants.filter(p => p.selectedCard).map(p => (
-                          <div key={p.userId} className="flex flex-col items-center gap-3">
+                          <div key={p.userId} className="flex flex-col items-center gap-2 lg:gap-3">
                             <Card 
                               type="white" 
                               text={p.selectedCard!} 
                               onClick={() => voteFor(p.userId)}
                               disabled={me?.hasVoted || p.userId === me?.userId}
                               selected={me?.votedFor === p.userId}
-                              className="w-40 h-56 text-sm"
+                              className="w-full max-w-[160px] aspect-[5/7] h-auto text-[10px] lg:text-sm p-4"
                             />
                             <div className="flex gap-1 h-1">
                               {participants.filter(voter => voter.votedFor === p.userId).map((voter, i) => (
@@ -412,12 +443,12 @@ export function GameSession() {
 
         {/* Hand Section */}
         {session?.status === 'playing' && me && (
-          <div className="absolute bottom-0 left-0 right-0 p-8 border-t border-white/5 bg-gradient-to-t from-brand-black to-transparent z-10">
-            <div className="flex justify-between items-end mb-4 px-2">
-              <h3 className="text-[10px] font-mono uppercase tracking-[0.2em] opacity-40">TU MANO ({me.hand.length})</h3>
-              {me.isReady && <span className="text-[10px] font-mono text-brand-accent font-black uppercase tracking-widest animate-pulse">CARTA SELECCIONADA</span>}
+          <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-8 border-t border-white/5 bg-gradient-to-t from-brand-black to-transparent z-10 backdrop-blur-sm lg:backdrop-blur-none">
+            <div className="flex justify-between items-end mb-3 lg:mb-4 px-2">
+              <h3 className="text-[8px] lg:text-[10px] font-mono uppercase tracking-[0.2em] opacity-40">TU MANO ({me.hand.length})</h3>
+              {me.isReady && <span className="text-[9px] lg:text-[10px] font-mono text-brand-accent font-black uppercase tracking-widest animate-pulse">SELECCIONADA</span>}
             </div>
-            <div className="flex gap-4 overflow-x-auto pb-4 px-2 custom-scrollbar">
+            <div className="flex gap-3 lg:gap-4 overflow-x-auto pb-4 px-2 custom-scrollbar no-scrollbar">
               {me.hand.map((card, i) => (
                 <Card 
                   key={i} 
@@ -425,7 +456,7 @@ export function GameSession() {
                   text={card} 
                   onClick={() => selectCard(card)} 
                   disabled={me.isReady}
-                  className="w-40 h-52 shrink-0 p-4"
+                  className="w-32 lg:w-40 h-44 lg:h-52 shrink-0 p-4 text-[10px] lg:text-sm shadow-2xl"
                 />
               ))}
             </div>
