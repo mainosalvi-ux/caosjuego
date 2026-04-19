@@ -3,7 +3,13 @@ import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
-const app = initializeApp(firebaseConfig);
+// Use environment variable for API Key to avoid hardcoding secrets
+const finalConfig = {
+  ...firebaseConfig,
+  apiKey: (import.meta as any).env.VITE_FIREBASE_API_KEY || firebaseConfig.apiKey
+};
+
+const app = initializeApp(finalConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const googleProvider = new GoogleAuthProvider();
