@@ -1,0 +1,40 @@
+export const OFFICIAL_DECK = {
+  id: 'official',
+  title: 'MAZO OFICIAL ZARPADO',
+  creatorId: 'system',
+  blackCards: [
+    "No hay nada más satisfactorio que __________ en medio de una boda.",
+    "Mi superpoder secreto es __________.",
+    "__________: Una historia de amor y tragedia.",
+    "La causa principal del divorcio de mis padres fue __________.",
+    "__________ fue lo que realmente hundió al Titanic.",
+    "En mi testamento pedí que mi ataúd esté lleno de __________.",
+    "La verdadera razón por la que expulsaron a Adán y Eva fue __________.",
+    "En el espacio, nadie puede oírte __________.",
+    "__________ es la única forma de arreglar una relación tóxica.",
+    "Para mi próxima cita, planeo impresionar con __________."
+  ],
+  whiteCards: [
+    "Un ventilador lleno de confeti de carne.",
+    "Decirle 'mamá' a la profesora.",
+    "Una pizza con piña y tristeza.",
+    "Ochenta palomas en un saco.",
+    "El cadáver de Walt Disney.",
+    "Morderle los tobillos al cartero.",
+    "Un tutorial de YouTube de 2008.",
+    "El fantasma de las navidades pasadas.",
+    "Un grupo de pingüinos con crisis existencial.",
+    "Un sándwich de jamón y desesperación.",
+    "Llorar en la fila del McDonald's.",
+    "Un ejército de ardillas ninjas.",
+    "La cara de susto de mi abuela.",
+    "Un baile erótico para un ciego.",
+    "El olor a humedad de la casa de mis tíos.",
+    "Un cura bailando reggeaton.",
+    "Diarrea explosiva en un ascensor.",
+    "El bigote de Hitler hecho de chocolate.",
+    "Tirarle piedras a los aviones.",
+    "Un mimo con síndrome de Tourette."
+  ],
+  createdAt: new Date().toISOString()
+};

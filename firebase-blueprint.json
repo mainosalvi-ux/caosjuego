@@ -1,0 +1,78 @@
+{
+  "entities": {
+    "Profile": {
+      "title": "User Profile",
+      "description": "Public profile information for a user.",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string", "description": "The user's display name." },
+        "avatar": { "type": "string", "description": "URL to the user's avatar image." }
+      },
+      "required": ["displayName"]
+    },
+    "Deck": {
+      "title": "Custom Deck",
+      "description": "A mazo of white and black cards.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Title of the deck." },
+        "creatorId": { "type": "string", "description": "UID of the user who created it." },
+        "whiteCards": { "type": "array", "items": { "type": "string" }, "description": "List of white response cards." },
+        "blackCards": { "type": "array", "items": { "type": "string" }, "description": "List of black situation cards." },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "creatorId", "whiteCards", "blackCards"]
+    },
+    "Session": {
+      "title": "Game Session",
+      "description": "An active multiplayer game instance.",
+      "type": "object",
+      "properties": {
+        "hostId": { "type": "string" },
+        "deckId": { "type": "string" },
+        "status": { "type": "string", "enum": ["waiting", "playing", "voting", "ended"] },
+        "currentBlackCard": { "type": "string" },
+        "round": { "type": "number" },
+        "hostDeck": { "type": "object", "description": "Snapshot of the host's mazo used for this game." },
+        "timerEnd": { "type": "number", "description": "Unix timestamp when the current phase ends." },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["hostId", "status", "round"]
+    },
+    "Participant": {
+      "title": "Session Participant",
+      "description": "Individual player data within a session.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "displayName": { "type": "string" },
+        "hand": { "type": "array", "items": { "type": "string" } },
+        "selectedCard": { "type": "string" },
+        "score": { "type": "number" },
+        "isReady": { "type": "boolean" },
+        "hasVoted": { "type": "boolean" },
+        "votedFor": { "type": "string", "description": "UID of the participant voted for." }
+      },
+      "required": ["userId", "displayName", "score"]
+    },
+    "ChatMessage": {
+      "title": "Chat Message",
+      "description": "A message sent in the session chat.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "displayName": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "displayName", "text", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/profiles/{userId}": { "schema": "Profile", "description": "User profiles." },
+    "/decks/{deckId}": { "schema": "Deck", "description": "Shared and private decks." },
+    "/sessions/{sessionId}": { "schema": "Session", "description": "Active games." },
+    "/sessions/{sessionId}/participants/{participantId}": { "schema": "Participant", "description": "Players in a session." },
+    "/sessions/{sessionId}/chat/{messageId}": { "schema": "ChatMessage", "description": "Chat log for the session." }
+  }
+}
