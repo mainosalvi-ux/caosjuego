@@ -20,7 +20,7 @@ export const auth = getAuth(app);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const googleProvider = new GoogleAuthProvider();
 
-export const signIn = () => signInWithRedirect(auth, googleProvider);
+export const signIn = () => signInWithPopup(auth, googleProvider);
 export const signOut = () => auth.signOut();
 
 async function testConnection() {
