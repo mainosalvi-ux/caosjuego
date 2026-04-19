@@ -13,20 +13,33 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log("App mounted, checking auth state...");
+    
     // Check for redirect result on mount
-    getRedirectResult(auth).catch((err) => {
-      console.error("Auth redirect error:", err);
-      if (err.code === 'auth/unauthorized-domain') {
-        setError(`Dominio no autorizado. Asegúrate de añadir este dominio en la consola de Firebase: ${window.location.hostname}`);
-      } else {
-        setError(err.message);
-      }
-    });
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result) {
+          console.log("Redirect result success:", result.user.email);
+        } else {
+          console.log("No redirect result found (normal mount)");
+        }
+      })
+      .catch((err) => {
+        console.error("Auth redirect error:", err);
+        if (err.code === 'auth/unauthorized-domain') {
+          setError(`Dominio no autorizado. Añade este dominio en Firebase: ${window.location.hostname}`);
+        } else {
+          setError(`Error de autenticación: ${err.message}`);
+        }
+      });
 
-    return onAuthStateChanged(auth, (u) => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      console.log("Auth state changed. User:", u ? u.email : "Logged out");
       setUser(u);
       setLoading(false);
     });
+
+    return () => unsubscribe();
   }, []);
 
   if (loading) {
