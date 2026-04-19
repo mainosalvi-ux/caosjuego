@@ -4,9 +4,15 @@ import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 // Use environment variable for API Key to avoid hardcoding secrets
+const apiKey = (import.meta as any).env.VITE_FIREBASE_API_KEY || firebaseConfig.apiKey;
+
+if (!apiKey || apiKey === "PASTE_YOUR_FIREBASE_API_KEY_HERE") {
+  console.error("🔥 Error: Firebase API Key is missing or invalid. Please check your environment variables (VITE_FIREBASE_API_KEY).");
+}
+
 const finalConfig = {
   ...firebaseConfig,
-  apiKey: (import.meta as any).env.VITE_FIREBASE_API_KEY || firebaseConfig.apiKey
+  apiKey: apiKey
 };
 
 const app = initializeApp(finalConfig);
